@@ -18,6 +18,11 @@ Ce script permet d'installer de manière automatique un serveur mail complet ave
 ### Installation
 
 ```bash
+apt-get update && apt-get dist-upgrade
+apt-get install git-core
+```
+
+```bash
 cd /tmp
 git clone https://github.com/hardware/mailserver-autoinstall.git
 cd mailserver-autoinstall

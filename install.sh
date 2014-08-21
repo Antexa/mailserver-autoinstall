@@ -1,4 +1,26 @@
 #!/bin/bash
+#
+# Script d'installation de Postfix, Dovecot et Rainloop
+# Auteur : Hardware <contact@meshup.net>
+#
+# Nécessite Debian 7 “wheezy” - 32/64 bits minimum. Ainsi que :
+# Nginx, PHP, MySQL, OpenSSL (Un serveur LEMP fonctionnel)
+#
+# Tiré du tutoriel sur mondedie.fr disponible ici:
+# http://mondedie.fr/viewtopic.php?id=5302
+#
+# Installation:
+#
+# apt-get update && apt-get dist-upgrade
+# apt-get install git-core
+#
+# cd /tmp
+# git clone https://github.com/hardware/mailserver-autoinstall.git
+# cd mailserver-autoinstall
+# chmod a+x install.sh && ./install.sh
+#
+# Inspiré du script d'installation de rutorrent de Ex_Rat :
+# https://bitbucket.org/exrat/install-rutorrent
 
 CSI="\033["
 CEND="${CSI}0m"
