@@ -273,7 +273,7 @@ if [ "$PASSWDPATH" = "" ]; then
 fi
 
 echo -e "${CGREEN}-> Ajout du vhost postfixadmin ${CEND}"
-cat > /etc/nginx/sites-enabled/postfixadmin <<EOF
+cat > /etc/nginx/sites-enabled/postfixadmin.conf <<EOF
 server {
    listen 80;
    server_name     ${PFADOMAIN}.${DOMAIN};
