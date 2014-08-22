@@ -67,7 +67,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo -e "${CRED}/!\ ERREUR: Postfix est déjà installé sur le serveur.${CEND}" 1>&2
     echo ""
-    exit 1
+    # exit 1
 fi
 
 dpkg -s dovecot-core | grep "install ok installed" 2> /dev/null
