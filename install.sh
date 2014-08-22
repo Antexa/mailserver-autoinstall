@@ -50,8 +50,13 @@ checkBin() {
 }
 
 # Vérification des exécutables
-command -v dpkg    > /dev/null 2>&1 || { echo `checkBin dpkg`    >&2; exit 1; }
+command -v dpkg > /dev/null 2>&1 || { echo `checkBin dpkg`    >&2; exit 1; }
 command -v apt-get > /dev/null 2>&1 || { echo `checkBin apt-get` >&2; exit 1; }
+command -v mysql > /dev/null 2>&1 || { echo `checkBin mysql` >&2; exit 1; }
+command -v mysqladmin > /dev/null 2>&1 || { echo `checkBin mysqladmin` >&2; exit 1; }
+command -v wget > /dev/null 2>&1 || { echo `checkBin wget` >&2; exit 1; }
+command -v tar > /dev/null 2>&1 || { echo `checkBin tar` >&2; exit 1; }
+command -v openssl > /dev/null 2>&1 || { echo `checkBin openssl` >&2; exit 1; }
 
 # ##########################################################################
 
