@@ -572,11 +572,6 @@ protocols = imap lmtp
 !include_try local.conf
 EOF
 
-apt-get -y purge postfix postfix-mysql
-apt-get -y autoremove
-rm -rf /etc/nginx/sites-enabled/postfixadmin
-rm -rf /var/www/postfixadmin/
-
 echo -e "${CGREEN}-> Mise en place du fichier /etc/dovecot/conf.d/10-mail.conf ${CEND}"
 cat > /etc/dovecot/conf.d/10-mail.conf <<EOF
 ## Mailbox locations and namespaces
