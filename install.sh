@@ -475,8 +475,8 @@ mailbox_command = procmail -a "\$EXTENSION"
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
-inet_protocols = ipv4, ipv6
-smtp_address_preference = any
+inet_protocols = ipv4
+# smtp_address_preference = ipv4
 EOF
 
 SSLOPTS="req -new -x509 -days 1095 -nodes -newkey rsa:4096"
@@ -560,7 +560,12 @@ cat > /etc/dovecot/dovecot.conf <<EOF
 
 # Enable installed protocols
 !include_try /usr/share/dovecot/protocols.d/*.protocol
-protocols = imap lmtp
+protocols = imap imaps lmtp
+
+# A space separated list of IP or host addresses where to listen in for
+# connections. "*" listens in all IPv4 interfaces. "[::]" listens in all IPv6
+# interfaces. Use "*, [::]" for listening both IPv4 and IPv6.
+listen = *
 
 # Most of the actual configuration gets included below. The filenames are
 # first sorted by their ASCII value and parsed in that order. The 00-prefixes
