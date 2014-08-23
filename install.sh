@@ -401,13 +401,12 @@ echo -e "${CPURPLE}------------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Mise en place du fichier /etc/postfix/master.cf ${CEND}"
-cat >> /etc/postfix/master.cf <<EOF
-submission inet n       -       -       -       -       smtpd
-   -o syslog_name=postfix/submission
-   -o smtpd_tls_security_level=encrypt
-   -o smtpd_sasl_auth_enable=yes
-   -o smtpd_client_restrictions=permit_sasl_authenticated,reject
-EOF
+sed -i -e "0,/#\(.*smtp\([^s]\).*inet.*n.*smtpd.*\)/s/#\(.*smtp\([^s]\).*inet.*n.*smtpd.*\)/\1/" \
+       -e "s/#\(.*submission.*inet.*n.*\)/\1/" \
+       -e "s/#\(.*syslog_name=postfix\/submission\)/\1/" \
+       -e "s/#\(.*smtpd_tls_security_level=encrypt\)/\1/" \
+       -e "0,/#\(.*smtpd_sasl_auth_enable=yes\)/s/#\(.*smtpd_sasl_auth_enable=yes\)/\1/" \
+       -e "0,/#\(.*smtpd_client_restrictions=.*\)/s/#\(.*smtpd_client_restrictions=.*\)/\1/" /etc/postfix/master.cf
 
 echo -e "${CGREEN}-> Mise en place du fichier /etc/postfix/main.cf ${CEND}"
 cat > /etc/postfix/main.cf <<EOF
