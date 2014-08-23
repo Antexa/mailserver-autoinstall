@@ -45,6 +45,21 @@ fi
 
 # ##########################################################################
 
+smallLoader() {
+    echo ""
+    echo ""
+    echo -ne '[ + + +             ] 3s \r'
+    sleep 1
+    echo -ne '[ + + + + + +       ] 2s \r'
+    sleep 1
+    echo -ne '[ + + + + + + + + + ] 1s \r'
+    sleep 1
+    echo -ne '[ + + + + + + + + + ] Appuyez sur [ENTRÉE] pour continuer... \r'
+    echo -ne '\n'
+
+    read
+}
+
 checkBin() {
     echo -e "${CRED}/!\ ERREUR: Le programme '$1' est requis pour cette installation."
 }
@@ -57,10 +72,11 @@ command -v mysqladmin > /dev/null 2>&1 || { echo `checkBin mysqladmin` >&2; exit
 command -v wget > /dev/null 2>&1 || { echo `checkBin wget` >&2; exit 1; }
 command -v tar > /dev/null 2>&1 || { echo `checkBin tar` >&2; exit 1; }
 command -v openssl > /dev/null 2>&1 || { echo `checkBin openssl` >&2; exit 1; }
+command -v unzip > /dev/null 2>&1 || { echo `checkBin unzip` >&2; exit 1; }
 
 # ##########################################################################
 
-dpkg -s postfix | grep "install ok installed" 2> /dev/null
+dpkg -s postfix | grep "install ok installed" &> /dev/null
 
 # On vérifie que Postfix n'est pas installé
 if [ $? -eq 0 ]; then
@@ -70,7 +86,7 @@ if [ $? -eq 0 ]; then
     # exit 1
 fi
 
-dpkg -s dovecot-core | grep "install ok installed" 2> /dev/null
+dpkg -s dovecot-core | grep "install ok installed" &> /dev/null
 
 # On vérifie que Dovecot n'est pas installé
 if [ $? -eq 0 ]; then
@@ -80,7 +96,7 @@ if [ $? -eq 0 ]; then
     exit 1
 fi
 
-dpkg -s opendkim | grep "install ok installed" 2> /dev/null
+dpkg -s opendkim | grep "install ok installed" &> /dev/null
 
 # On vérifie que OpenDKIM n'est pas installé
 if [ $? -eq 0 ]; then
@@ -97,11 +113,13 @@ clear
 echo ""
 echo -e "${CYELLOW}    Installation automatique d'une serveur de mail avec Postfix et Dovecot${CEND}"
 echo ""
-echo -e "${CYELLOW}
-                                      |          |_)         _|
-            __ \`__ \   _ \  __ \   _\` |  _ \  _\` | |  _ \   |    __|
-            |   |   | (   | |   | (   |  __/ (   | |  __/   __| |
-           _|  _|  _|\___/ _|  _|\__,_|\___|\__,_|_|\___|_)_|  _|
+echo -e "${CCYAN}
+███╗   ███╗ ██████╗ ███╗   ██╗██████╗ ███████╗██████╗ ██╗███████╗   ███████╗██████╗
+████╗ ████║██╔═══██╗████╗  ██║██╔══██╗██╔════╝██╔══██╗██║██╔════╝   ██╔════╝██╔══██╗
+██╔████╔██║██║   ██║██╔██╗ ██║██║  ██║█████╗  ██║  ██║██║█████╗     █████╗  ██████╔╝
+██║╚██╔╝██║██║   ██║██║╚██╗██║██║  ██║██╔══╝  ██║  ██║██║██╔══╝     ██╔══╝  ██╔══██╗
+██║ ╚═╝ ██║╚██████╔╝██║ ╚████║██████╔╝███████╗██████╔╝██║███████╗██╗██║     ██║  ██║
+╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═════╝ ╚═╝╚══════╝╚═╝╚═╝     ╚═╝  ╚═╝
 
 ${CEND}"
 echo ""
@@ -168,31 +186,40 @@ fi
 # ##########################################################################
 
 echo ""
-echo -e "${CPURPLE}-----------------------------${CEND}"
-echo -e "${CPURPLE}[  INSTALLATION DE POSTFIX  ]${CEND}"
-echo -e "${CPURPLE}-----------------------------${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
+echo -e "${CCYAN}[  INSTALLATION DE POSTFIX  ]${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Installation de postfix et postfix-mysql ${CEND}"
+echo ""
+
 apt-get install -y postfix postfix-mysql
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ Une erreur est survenue pendant l'installation des paquets postfix et postfix-mysql.${CEND}" 1>&2
+    echo -e "\n ${CRED}/!\ FATAL: Une erreur est survenue pendant l'installation de Postfix.${CEND}" 1>&2
     echo ""
     exit 1
 fi
 
+smallLoader
+clear
+
+echo -e "${CCYAN}-------------------------------------------${CEND}"
+echo -e "${CCYAN}[  CREATION DE LA BASE DE DONNEE POSTFIX  ]${CEND}"
+echo -e "${CCYAN}-------------------------------------------${CEND}"
+echo ""
 
 echo ""
-echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
+echo -e "${CGREEN}------------------------------------------------------------------${CEND}"
 read -sp "> Veuillez saisir le mot de passe de l'utilisateur root de MySQL : " MYSQLPASSWD
 echo ""
-echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
+echo -e "${CGREEN}------------------------------------------------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Création de la base de donnée Postfix ${CEND}"
-until mysqladmin -uroot -p$MYSQLPASSWD create postfix 2> /dev/null
+until mysqladmin -uroot -p$MYSQLPASSWD create postfix &> /dev/null
 do
     echo -e "${CRED}\n /!\ ERREUR: Mot de passe root incorrect \n ${CEND}" 1>&2
     read -sp "> Veuillez re-saisir le mot de passe : " MYSQLPASSWD
@@ -202,44 +229,55 @@ done
 echo -e "${CGREEN}-> Génération du mot de passe de l'utilisateur Postfix ${CEND}"
 PFPASSWD=$(strings /dev/urandom | grep -o '[1-9A-NP-Za-np-z]' | head -n 10 | tr -d '\n')
 SQLQUERY="CREATE USER 'postfix'@'localhost' IDENTIFIED BY '${PFPASSWD}'; \
-          GRANT USAGE ON *.* TO 'postfix'@'localhost' IDENTIFIED BY '${PFPASSWD}'; \
+          GRANT USAGE ON *.* TO 'postfix'@'localhost'; \
           GRANT ALL PRIVILEGES ON postfix.* TO 'postfix'@'localhost';"
 
 echo -e "${CGREEN}-> Création de l'utilisateur Postfix ${CEND}"
-mysql -uroot -p$MYSQLPASSWD "postfix" -e "$SQLQUERY"
+mysql -uroot -p$MYSQLPASSWD "postfix" -e "$SQLQUERY" &> /dev/null
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ ECHEC: un problème est survenue lors de la création de l'utilisateur 'postfix'.${CEND}" 1>&2
+    echo -e "\n ${CRED}/!\ FATAL: un problème est survenu lors de la création de l'utilisateur 'postfix' dans la BDD.${CEND}" 1>&2
     echo ""
+    exit 1
 fi
+
+smallLoader
+clear
 
 # ##########################################################################
 
-echo ""
-echo -e "${CPURPLE}----------------------------------${CEND}"
-echo -e "${CPURPLE}[  INSTALLATION DE POSTFIXADMIN  ]${CEND}"
-echo -e "${CPURPLE}----------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------${CEND}"
+echo -e "${CCYAN}[  INSTALLATION DE POSTFIXADMIN  ]${CEND}"
+echo -e "${CCYAN}----------------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Téléchargement de PostfixAdmin ${CEND}"
-cd /var/www
+echo ""
 
+cd /var/www
 URLPFA="http://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-${POSTFIXADMIN_VER}/postfixadmin-${POSTFIXADMIN_VER}.tar.gz"
 
 until wget $URLPFA
 do
-    echo -e "${CRED}\n/!\ ERREUR: URL de téléchargement invalide !${CEND}" 1>&2
+    echo -e "${CRED}\n/!\ ERREUR: L'URL de téléchargement de PostfixAdmin est invalide !${CEND}" 1>&2
     echo -e "${CRED}/!\ Merci de rapporter cette erreur ici :${CEND}" 1>&2
     echo -e "${CCYAN}-> https://github.com/hardware/mailserver-autoinstall/issues${CEND} \n" 1>&2
     echo "> Veuillez saisir une autre URL pour que le script puisse télécharger PostfixAdmin : "
-    read -p "[URL]: " URLPFA
+    read -p "[URL] : " URLPFA
     echo -e ""
 done
 
+# TODO: Vérifier que c'est bien une archive TAR.GZ
+
+echo -e "${CGREEN}-> Décompression du PostfixAdmin ${CEND}"
 tar -xzf postfixadmin-$POSTFIXADMIN_VER.tar.gz
+
+echo -e "${CGREEN}-> Création du répertoire /var/www/postfixadmin ${CEND}"
 mv postfixadmin-$POSTFIXADMIN_VER postfixadmin
 rm -rf postfixadmin-$POSTFIXADMIN_VER.tar.gz
+
+echo -e "${CGREEN}-> Modification des permissions ${CEND}"
 chown -R www-data:www-data postfixadmin
 
 PFACONFIG="/var/www/postfixadmin/config.inc.php"
@@ -275,35 +313,40 @@ fi
 echo -e "${CGREEN}-> Ajout du vhost postfixadmin ${CEND}"
 cat > /etc/nginx/sites-enabled/postfixadmin.conf <<EOF
 server {
-   listen 80;
-   server_name     ${PFADOMAIN}.${DOMAIN};
-   root            /var/www/postfixadmin;
-   index           index.php;
-   charset         utf-8;
+    listen          80;
+    server_name     ${PFADOMAIN}.${DOMAIN};
+    root            /var/www/postfixadmin;
+    index           index.php;
+    charset         utf-8;
 
-   auth_basic "PostfixAdmin - Connexion";
-   auth_basic_user_file ${PASSWDPATH};
+    auth_basic "PostfixAdmin - Connexion";
+    auth_basic_user_file ${PASSWDPATH};
 
-   location / {
-      try_files \$uri \$uri/ index.php;
-   }
+    location / {
+        try_files \$uri \$uri/ index.php;
+    }
 
-   location ~* \.php$ {
+    location ~* \.php$ {
         include       /etc/nginx/fastcgi_params;
         fastcgi_pass  unix:/var/run/php5-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-   }
+    }
 }
 EOF
 
+echo -e "${CGREEN}-> Redémarrage de PHP-FPM.${CEND}"
+service php5-fpm restart
 echo -e "${CGREEN}-> Redémarrage de nginx pour prendre en compte le nouveau vhost.${CEND}"
 service nginx restart
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ ECHEC: un problème est survenue lors du redémarrage de nginx.${CEND}" 1>&2
-    echo -e "\n ${CRED}/!\ Consultez le fichier de log /var/log/nginx/errors.log.${CEND}" 1>&2
+    echo -e "${CRED}/!\ ECHEC: un problème est survenu lors du redémarrage de Nginx.${CEND}" 1>&2
+    echo -e "${CRED}/!\ Ouvrez une nouvelle session dans un autre terminal et${CEND}" 1>&2
+    echo -e "${CRED}/!\ consultez le fichier de log :${CEND} ${CCYAN}/var/log/nginx/errors.log${CEND}" 1>&2
+    echo -e "${CRED}/!\ Une fois le problème résolu, appuyez sur [ENTRÉE]...${CEND}" 1>&2
+    smallLoader
     echo ""
 fi
 
@@ -350,8 +393,8 @@ echo ""
 echo -e "${CYELLOW}> http://${PFADOMAIN}.${DOMAIN}/login.php${CEND}"
 echo ""
 echo -e "${CBROWN}Veuillez ajouter au minimum les éléments ci-dessous :${CEND}"
-echo -e "${CBROWN} - Votre domaine : ${CEND}${CGREEN}${DOMAIN}${CEND}"
-echo -e "${CBROWN} - Une adresse email : ${CEND}${CGREEN}admin@${DOMAIN}${CEND}"
+echo -e "${CBROWN} - Votre domaine :${CEND} ${CGREEN}${DOMAIN}${CEND}"
+echo -e "${CBROWN} - Une adresse email :${CEND} ${CGREEN}admin@${DOMAIN}${CEND}"
 echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
 echo ""
 
@@ -361,43 +404,14 @@ echo -e "${CRED} /!\ N'APPUYEZ PAS SUR ENTREE AVANT D'AVOIR EFFECTUÉ TOUT CE QU
 echo -e "${CRED}------------------------------------------------------------------------------------------${CEND}"
 echo ""
 
-echo -e "${CCYAN}Appuyez sur [ENTREE] pour continuer...${CEND}"
-read
-
-echo ""
-echo -e "${CCYAN}----------------------------------${CEND}"
-echo -e "${CCYAN}Reprise du script dans 10 secondes${CEND}"
-echo -e "${CCYAN}----------------------------------${CEND}"
-echo ""
-echo -ne '[                  ] 10s \r'
-sleep 1
-echo -ne '[+                 ] 9s \r'
-sleep 1
-echo -ne '[+ +               ] 8s \r'
-sleep 1
-echo -ne '[+ + +             ] 7s \r'
-sleep 1
-echo -ne '[+ + + +           ] 6s \r'
-sleep 1
-echo -ne '[+ + + + +         ] 5s \r'
-sleep 1
-echo -ne '[+ + + + + +       ] 4s \r'
-sleep 1
-echo -ne '[+ + + + + + +     ] 3s \r'
-sleep 1
-echo -ne '[+ + + + + + + +   ] 2s \r'
-sleep 1
-echo -ne '[+ + + + + + + + + ] 1s \r'
-sleep 1
-echo -ne '[+ + + + + + + + + +] Reprise... \r'
-echo -ne '\n'
+smallLoader
+clear
 
 # ##########################################################################
 
-echo ""
-echo -e "${CPURPLE}------------------------------${CEND}"
-echo -e "${CPURPLE}[  CONFIGURATION DE POSTFIX  ]${CEND}"
-echo -e "${CPURPLE}------------------------------${CEND}"
+echo -e "${CCYAN}------------------------------${CEND}"
+echo -e "${CCYAN}[  CONFIGURATION DE POSTFIX  ]${CEND}"
+echo -e "${CCYAN}------------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Mise en place du fichier /etc/postfix/master.cf ${CEND}"
@@ -450,8 +464,8 @@ smtpd_sasl_local_domain = \$mydomain
 smtpd_sasl_authenticated_header = yes
 
 smtpd_tls_auth_only = yes
-smtpd_tls_cert_file = /etc/ssl/certs/server.crt
-smtpd_tls_key_file  = /etc/ssl/private/server.key
+smtpd_tls_cert_file = /etc/ssl/certs/dovecot.pem
+smtpd_tls_key_file  = /etc/ssl/private/dovecot.pem
 
 broken_sasl_auth_clients = yes
 
@@ -478,22 +492,7 @@ inet_protocols = ipv4
 # smtp_address_preference = ipv4
 EOF
 
-SSLOPTS="req -new -x509 -days 1095 -nodes -newkey rsa:4096"
-
-echo -e "${CGREEN}-> Création du certificat SSL ${CEND}"
 echo ""
-openssl $SSLOPTS -out /etc/ssl/certs/server.crt -keyout /etc/ssl/private/server.key <<EOF
-FR
-France
-Paris
-UNKNOWN
-UNKNOWN
-${FQDN}
-admin@${DOMAIN}
-EOF
-
-echo -e "\n"
-echo -e "\n"
 echo -e "${CGREEN}-> Création du fichier mysql-virtual-mailbox-domains.cf ${CEND}"
 
 cat > /etc/postfix/mysql-virtual-mailbox-domains.cf <<EOF
@@ -527,14 +526,24 @@ dbname = postfix
 query = SELECT goto FROM alias WHERE address='%s' AND active = 1
 EOF
 
-echo ""
-echo -e "${CPURPLE}-----------------------------${CEND}"
-echo -e "${CPURPLE}[  INSTALLATION DE DOVECOT  ]${CEND}"
-echo -e "${CPURPLE}-----------------------------${CEND}"
+smallLoader
+clear
+
+echo -e "${CCYAN}-----------------------------${CEND}"
+echo -e "${CCYAN}[  INSTALLATION DE DOVECOT  ]${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Installation de dovecot-core, dovecot-imapd, dovecot-lmtpd et dovecot-mysql ${CEND}"
+echo ""
 apt-get install -y dovecot-core dovecot-imapd dovecot-lmtpd dovecot-mysql
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo -e "\n ${CRED}/!\ FATAL: Une erreur est survenue pendant l'installation de Dovecot.${CEND}" 1>&2
+    echo ""
+    exit 1
+fi
 
 echo ""
 echo -e "${CGREEN}-> Création du conteneur MAILDIR ${CEND}"
@@ -553,13 +562,14 @@ echo -e "${CGREEN}-> Déplacement du certificat SSL et de la clé privée dans l
 mv /etc/dovecot/dovecot.pem /etc/ssl/certs
 mv /etc/dovecot/private/dovecot.pem /etc/ssl/private
 
+echo ""
 echo -e "${CGREEN}-> Mise en place du fichier /etc/dovecot/dovecot.conf ${CEND}"
 cat > /etc/dovecot/dovecot.conf <<EOF
 ## Dovecot configuration file
 
 # Enable installed protocols
 !include_try /usr/share/dovecot/protocols.d/*.protocol
-protocols = imap imaps lmtp
+protocols = imap lmtp
 
 # A space separated list of IP or host addresses where to listen in for
 # connections. "*" listens in all IPv4 interfaces. "[::]" listens in all IPv6
@@ -711,56 +721,217 @@ ssl_cert = </etc/ssl/certs/dovecot.pem
 ssl_key = </etc/ssl/private/dovecot.pem
 EOF
 
+smallLoader
+clear
+
 # ##########################################################################
 
-echo ""
-echo -e "${CCYAN}----------------------------------${CEND}"
-echo -e "${CCYAN}Reprise du script dans 10 secondes${CEND}"
-echo -e "${CCYAN}----------------------------------${CEND}"
-echo ""
-echo -ne '[                  ] 10s \r'
-sleep 1
-echo -ne '[+                 ] 9s \r'
-sleep 1
-echo -ne '[+ +               ] 8s \r'
-sleep 1
-echo -ne '[+ + +             ] 7s \r'
-sleep 1
-echo -ne '[+ + + +           ] 6s \r'
-sleep 1
-echo -ne '[+ + + + +         ] 5s \r'
-sleep 1
-echo -ne '[+ + + + + +       ] 4s \r'
-sleep 1
-echo -ne '[+ + + + + + +     ] 3s \r'
-sleep 1
-echo -ne '[+ + + + + + + +   ] 2s \r'
-sleep 1
-echo -ne '[+ + + + + + + + + ] 1s \r'
-sleep 1
-echo -ne '[+ + + + + + + + + +] Reprise... \r'
-echo -ne '\n'
-
-echo ""
-echo -e "${CPURPLE}------------------------------${CEND}"
-echo -e "${CPURPLE}[  REDÉMARRAGE DES SERVICES  ]${CEND}"
-echo -e "${CPURPLE}------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}[  INSTALLATION D'OPENDKIM  ]${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
 echo ""
 
+echo -e "${CGREEN}-> Installation de opendkim et opendkim-tools ${CEND}"
+echo ""
+apt-get install -y opendkim opendkim-tools
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo -e "\n ${CRED}/!\ FATAL: Une erreur est survenue pendant l'installation d'OpenDKIM.${CEND}" 1>&2
+    echo ""
+    exit 1
+fi
+
+echo -e "${CGREEN}-> Mise en place du fichier /etc/opendkim.conf ${CEND}"
+cat > /etc/opendkim.conf <<EOF
+AutoRestart             Yes
+AutoRestartRate         10/1h
+UMask                   002
+Syslog                  yes
+SyslogSuccess           Yes
+LogWhy                  Yes
+
+Canonicalization        relaxed/simple
+
+ExternalIgnoreList      refile:/etc/opendkim/TrustedHosts
+InternalHosts           refile:/etc/opendkim/TrustedHosts
+KeyTable                refile:/etc/opendkim/KeyTable
+SigningTable            refile:/etc/opendkim/SigningTable
+
+Mode                    sv
+PidFile                 /var/run/opendkim/opendkim.pid
+SignatureAlgorithm      rsa-sha256
+
+UserID                  opendkim:opendkim
+
+Socket                  inet:12301@localhost
+EOF
+
+echo -e "${CGREEN}-> Mise en place du fichier /etc/default/opendkim ${CEND}"
+echo 'SOCKET="inet:12301@localhost"' > /etc/default/opendkim
+
+echo -e "${CGREEN}-> Mise à jour du fichier de configuration de Postfix ${CEND}"
+cat >> /etc/postfix/main.cf <<EOF
+# Configuration de DKIM
+milter_protocol = 2
+milter_default_action = accept
+smtpd_milters = inet:localhost:12301
+non_smtpd_milters = inet:localhost:12301
+EOF
+
+echo -e "${CGREEN}-> Création du répertoire /etc/opendkim ${CEND}"
+mkdir -p /etc/opendkim/keys
+
+echo -e "${CGREEN}-> Mise en place du fichier /etc/opendkim/TrustedHosts ${CEND}"
+cat > /etc/opendkim/TrustedHosts <<EOF
+127.0.0.1
+localhost
+192.168.0.1/24
+
+*.${DOMAIN}
+EOF
+
+echo -e "${CGREEN}-> Mise en place du fichier /etc/opendkim/KeyTable ${CEND}"
+cat > /etc/opendkim/KeyTable <<EOF
+mail._domainkey.${DOMAIN} ${DOMAIN}:mail:/etc/opendkim/keys/${DOMAIN}/mail.private
+EOF
+
+echo -e "${CGREEN}-> Mise en place du fichier /etc/opendkim/SigningTable ${CEND}"
+cat > /etc/opendkim/SigningTable <<EOF
+*@${DOMAIN} mail._domainkey.${DOMAIN}
+EOF
+
+echo ""
+echo -e "${CPURPLE}-----------------------------------${CEND}"
+echo -e "${CPURPLE}[  CREATION DES CLÉS DE SÉCURITÉ  ]${CEND}"
+echo -e "${CPURPLE}-----------------------------------${CEND}"
+echo ""
+
+cd /etc/opendkim/keys
+
+echo -e "${CGREEN}-> Création du répertoire /etc/opendkim/keys/${DOMAIN} ${CEND}"
+mkdir $DOMAIN && cd $DOMAIN
+
+echo -e "${CGREEN}-> Génération des clés de chiffrement ${CEND}"
+echo ""
+echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
+echo ""
+
+opendkim-genkey -s mail -d $DOMAIN
+
+echo ""
+echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
+echo ""
+
+echo -e "${CGREEN}-> Modification des permissions des clés ${CEND}"
+chown opendkim:opendkim mail.private
+chmod 400 mail.private mail.txt
+
+smallLoader
+clear
+
+# ##########################################################################
+
+echo -e "${CCYAN}------------------------------${CEND}"
+echo -e "${CCYAN}[  INSTALLATION DE RAINLOOP  ]${CEND}"
+echo -e "${CCYAN}------------------------------${CEND}"
+echo ""
+
+URLRAINLOOP="http://repository.rainloop.net/v2/webmail/rainloop-latest.zip"
+
+until wget $URLRAINLOOP
+do
+    echo -e "${CRED}\n/!\ ERREUR: L'URL de téléchargement de Rainloop est invalide !${CEND}" 1>&2
+    echo -e "${CRED}/!\ Merci de rapporter cette erreur ici :${CEND}" 1>&2
+    echo -e "${CCYAN}-> https://github.com/hardware/mailserver-autoinstall/issues${CEND} \n" 1>&2
+    echo "> Veuillez saisir une autre URL pour que le script puisse télécharger Rainloop : "
+    read -p "[URL] : " URLRAINLOOP
+    echo -e ""
+done
+
+echo -e "${CGREEN}-> Création du répertoire /var/www/rainloop ${CEND}"
+mkdir /var/www/rainloop
+
+echo -e "${CGREEN}-> Décompression de Rainloop dans le répertoire /var/www/rainloop ${CEND}"
+unzip rainloop-latest.zip -d /var/www/rainloop > /dev/null
+
+rm -rf rainloop-latest.zip
+cd /var/www/rainloop
+
+echo -e "${CGREEN}-> Modification des permissions ${CEND}"
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;
+chown -R www-data:www-data .
+
+echo ""
+echo -e "${CCYAN}-------------------------------------------------${CEND}"
+read -p "> Sous-domaine de Rainloop [Par défaut : webmail] : " RAINLOOPDOMAIN
+echo -e "${CCYAN}-------------------------------------------------${CEND}"
+echo ""
+
+if [ "$RAINLOOPDOMAIN" = "" ]; then
+    RAINLOOPDOMAIN="webmail"
+fi
+
+echo -e "${CGREEN}-> Ajout du vhost rainloop ${CEND}"
+cat > /etc/nginx/sites-enabled/rainloop.conf <<EOF
+server {
+    listen          80;
+    server_name     ${RAINLOOPDOMAIN}.${DOMAIN};
+    root            /var/www/rainloop;
+    index           index.php;
+    charset         utf-8;
+
+    auth_basic "Webmail - Connexion";
+    auth_basic_user_file ${PASSWDPATH};
+
+    location ^~ /data {
+        deny all;
+    }
+
+    location / {
+        try_files \$uri \$uri/ index.php;
+    }
+
+    location ~* \.php$ {
+        include       /etc/nginx/fastcgi_params;
+        fastcgi_pass  unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    }
+}
+EOF
+
+echo -e "${CGREEN}-> Redémarrage de PHP-FPM.${CEND}"
+service php5-fpm restart
+echo -e "${CGREEN}-> Redémarrage de nginx pour prendre en compte le nouveau vhost.${CEND}"
 service nginx restart
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ ECHEC: un problème est survenue lors du redémarrage de nginx.${CEND}" 1>&2
-    echo -e "\n ${CRED}/!\ Consultez le fichier de log /var/log/nginx/errors.log.${CEND}" 1>&2
+    echo -e "${CRED}/!\ ECHEC: un problème est survenu lors du redémarrage de Nginx.${CEND}" 1>&2
+    echo -e "${CRED}/!\ Ouvrez une nouvelle session dans un autre terminal et${CEND}" 1>&2
+    echo -e "${CRED}/!\ consultez le fichier de log :${CEND} ${CCYAN}/var/log/nginx/errors.log${CEND}" 1>&2
+    echo -e "${CRED}/!\ Une fois le problème résolu, appuyez sur [ENTRÉE]...${CEND}" 1>&2
+    smallLoader
     echo ""
 fi
+
+smallLoader
+clear
+
+# ##########################################################################
+
+echo -e "${CCYAN}------------------------------${CEND}"
+echo -e "${CCYAN}[  REDÉMARRAGE DES SERVICES  ]${CEND}"
+echo -e "${CCYAN}------------------------------${CEND}"
+echo ""
 
 service postfix restart
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ ECHEC: un problème est survenue lors du redémarrage de postfix.${CEND}" 1>&2
+    echo -e "\n ${CRED}/!\ FATAL: un problème est survenu lors du redémarrage de Postfix.${CEND}" 1>&2
     echo -e "\n ${CRED}/!\ Consultez le fichier de log /var/log/mail.log${CEND}" 1>&2
     echo ""
 fi
@@ -769,49 +940,143 @@ service dovecot restart
 
 if [ $? -ne 0 ]; then
     echo ""
-    echo -e "\n ${CRED}/!\ ECHEC: un problème est survenue lors du redémarrage de dovecot.${CEND}" 1>&2
-    echo -e "\n ${CRED}/!\ Consultez le fichier de log /var/log/nginx/errors.log.${CEND}" 1>&2
+    echo -e "\n ${CRED}/!\ FATAL: un problème est survenu lors du redémarrage de Dovecot.${CEND}" 1>&2
+    echo -e "\n ${CRED}/!\ Consultez le fichier de log /var/log/mail.log${CEND}" 1>&2
+    echo ""
+fi
+
+service opendkim restart
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo -e "\n ${CRED}/!\ FATAL: un problème est survenu lors du redémarrage d'OpenDKIM.${CEND}" 1>&2
     echo ""
 fi
 
 echo ""
-echo -e "${CPURPLE}----------------------------${CEND}"
-echo -e "${CPURPLE}[  VERIFICATION DES PORTS  ]${CEND}"
-echo -e "${CPURPLE}----------------------------${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}[  VERIFICATION DES PORTS  ]${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
 echo ""
 
-NBPORT=$(netstat -ptna | grep '0.0.0.0:25\|0.0.0.0:587\|0.0.0.0:993' | wc -l)
+NBPORT=$(netstat -ptna | grep '0.0.0.0:25\|0.0.0.0:587\|0.0.0.0:993\|127.0.0.1:12301' | wc -l)
 
 # Vérification des ports
-if [ $NBPORT -ne 3 ]; then
+if [ $NBPORT -ne 4 ]; then
     echo ""
-    echo -e "${CRED}/!\ ERREUR: Nombre de port invalide !${CEND}" 1>&2
-    echo -e "${CRED}POSTFIX: `service postfix status` !${CEND}" 1>&2
-    echo -e "${CRED}DOVECOT: `service dovecot status` !${CEND}" 1>&2
+    echo -e "${CRED}/!\ ERREUR: Nombre de ports invalide !${CEND}" 1>&2
+    echo ""
+    echo -e "${CRED}POSTFIX: `service postfix  status` !${CEND}"  1>&2
+    echo -e "${CRED}DOVECOT: `service dovecot  status` !${CEND}"  1>&2
+    echo -e "${CRED}DOVECOT: `service opendkim status` !${CEND}"  1>&2
     echo ""
     exit 1
 else
-    echo -e "${CGREEN}PORTS 25, 587, 993 [OK] ${CEND}"
+    echo -e "${CGREEN}PORTS : 25, 587, 993, 12301 [OK] ${CEND}"
 fi
 
 echo ""
-echo -e "${CPURPLE}-------------------${CEND}"
-echo -e "${CPURPLE}[  FIN DU SCRIPT  ]${CEND}"
-echo -e "${CPURPLE}-------------------${CEND}"
+echo -e "${CGREEN}-----------------------------------------${CEND}"
+echo -e "${CGREEN}[  INSTALLATION EFFECTUÉE AVEC SUCCÈS ! ]${CEND}"
+echo -e "${CGREEN}-----------------------------------------${CEND}"
 echo ""
 
-# {
-#    sleep 0.5
-#    echo "helo localhost"
-#    sleep 0.5
-# } | telnet localhost 25 | grep "250-STARTTLS"
+smallLoader
+clear
 
-# fgrep -q "250-STARTTLS" /tmp/telnet-smtp-output.tmp
-# GREPSTATUS=$?
+# ##########################################################################
 
-# if [ $GREPSTATUS -ne 0 ]; then
-#     echo ""
-#     echo -e "${CRED}/!\ ERREUR: protocole STARTTLS non activé !${CEND}" 1>&2
-#     echo ""
-#     exit 1
-# fi
+echo -e "${CCYAN}-----------------${CEND}"
+echo -e "${CCYAN}[ RÉCAPITULATIF ]${CEND}"
+echo -e "${CCYAN}-----------------${CEND}"
+
+echo ""
+echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
+echo -e "${CBROWN}Votre serveur mail est à présent opérationnel, félicitation ! =D${CEND}"
+echo ""
+echo -e "${CBROWN}Ajoutez la ligne ci-dessous dans le fichier Hosts de votre pc"
+echo -e "${CBROWN}si votre nom de domaine n'est pas encore configuré pour"
+echo -e "${CBROWN}le sous-domaine${CEND} ${CYELLOW}${RAINLOOPDOMAIN}.${DOMAIN}${CEND}"
+echo ""
+echo -e "${CYELLOW}  ${WANIP}     ${RAINLOOPDOMAIN}.${DOMAIN}${CEND}"
+echo ""
+echo -e "${CBROWN}Il ne vous reste plus qu'à configurer Rainloop en ajoutant votre domaine.${CEND}"
+echo -e "${CBROWN}Vous pouvez accéder à l'interface d'administration via cette URL :${CEND}"
+echo ""
+echo -e "${CYELLOW}> http://${RAINLOOPDOMAIN}.${DOMAIN}/?admin${CEND}"
+echo ""
+echo -e "${CBROWN}Par défaut les identifiants sont :${CEND} ${CGREEN}admin${CEND} et ${CGREEN}12345${CEND}"
+echo -e "${CBROWN}Allez voir le tutoriel pour savoir comment rajouter un domaine à Rainloop :${CEND}"
+echo ""
+echo -e "${CYELLOW}> http://mondedie.fr/viewtopic.php?id=5750${CEND}"
+echo ""
+echo -e "${CBROWN}Une fois que Rainloop sera correctement configuré, vous pourrez accéder${CEND}"
+echo -e "à votre boîte mail via cette URL :${CEND}"
+echo ""
+echo -e "${CYELLOW}> http://${RAINLOOPDOMAIN}.${DOMAIN}/${CEND}"
+echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
+echo ""
+
+smallLoader
+
+echo -e "${CCYAN}-------------------------------------${CEND}"
+echo -e "${CCYAN}[ PARAMÈTRES DE CONNEXION IMAP/SMTP ]${CEND}"
+echo -e "${CCYAN}-------------------------------------${CEND}"
+echo ""
+
+echo -e "${CGREEN}-> Utilisez les paramètres suivants pour configurer le client mail de votre choix.${CEND}"
+echo -e "${CGREEN}-> Le tutoriel suivant explique comment configurer Outlook, MailBird et eM Client.${CEND}"
+echo ""
+
+echo -e "${CYELLOW}> http://mondedie.fr/viewtopic.php?pid=11727#p11727${CEND}"
+
+echo ""
+echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
+echo -e "${CBROWN} - Adresse email :${CEND} ${CGREEN}admin@${DOMAIN}${CEND}"
+echo -e "${CBROWN} - Nom d'utilisateur IMAP/SMTP :${CEND} ${CGREEN}admin@${DOMAIN}${CEND}"
+echo -e "${CBROWN} - Mot de passe IMAP/SMTP :${CEND} ${CGREEN}Celui que vous avez mis dans PostfixAdmin${CEND}"
+echo -e "${CBROWN} - Serveur entrant IMAP :${CEND} ${CGREEN}${FQDN}${CEND}"
+echo -e "${CBROWN} - Serveur sortant SMTP :${CEND} ${CGREEN}${FQDN}${CEND}"
+echo -e "${CBROWN} - Port IMAP :${CEND} ${CGREEN}993${CEND}"
+echo -e "${CBROWN} - Port SMTP : 587 :${CEND} ${CGREEN}587${CEND}"
+echo -e "${CBROWN} - Protocole de chiffrement IMAP :${CEND} ${CGREEN}SSL/TLS${CEND}"
+echo -e "${CBROWN} - Protocole de chiffrement SMTP :${CEND} ${CGREEN}STARTTLS${CEND}"
+echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
+echo ""
+
+smallLoader
+
+echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}[ CONFIGURATION DE VOS DNS ]${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
+
+echo ""
+echo -e "${CRED}Vous devez impérativement ajouter un enregistrement de type MX à votre nom de domaine !${CEND}"
+echo -e "${CRED}Si cet enregistrement est pas ou mal défini, vous ne reçevrez JAMAIS d'emails.${CEND}"
+echo -e "${CRED}Exemple (le point à la fin est IMPORTANT !!) :${CEND}"
+echo ""
+echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CYELLOW}@    IN    MX    10    ${FQDN}.${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
+
+echo ""
+echo -e "${CBROWN}Ensuite ajoutez votre enregistrement DKIM :${CEND}"
+echo ""
+echo -e "${CCYAN}----------------------------${CEND}"
+cat /etc/opendkim/keys/$DOMAIN/mail.txt
+echo -e "${CCYAN}----------------------------${CEND}"
+echo ""
+
+echo -e "${CBROWN}Et pour finir vos enregistrements SPF :${CEND}"
+echo ""
+echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CYELLOW}@    IN    TXT    \"v=spf1 a mx ip4:${WANIP} ~all\"${CEND}"
+echo -e "${CYELLOW}@    IN    SPF    \"v=spf1 a mx ip4:${WANIP} ~all\"${CEND}"
+echo -e "${CCYAN}----------------------------${CEND}"
+echo ""
+
+echo -e "${CCYAN}-----------------${CEND}"
+echo -e "${CCYAN}[ FIN DU SCRIPT ]${CEND}"
+echo -e "${CCYAN}-----------------${CEND}"
+
+exit 0
