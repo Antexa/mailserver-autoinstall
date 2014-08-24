@@ -1,7 +1,3 @@
-##### /!\ ATTENTION : Ce script est en cours de développement, il n'est pas complètement fonctionnel. Veuillez ne pas l'utiliser sur votre serveur pour le moment.
-
-====================================================================================
-
 Serveur de mail - Installation automatique
 ==========================================
 
