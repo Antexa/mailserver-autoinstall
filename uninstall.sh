@@ -1,7 +1,14 @@
 #!/bin/bash
 #
-# Script de déinstallation de Postfix, Dovecot et Rainloop
+# Script de désinstallation de Postfix, Dovecot et Rainloop
 # Auteur : Hardware <contact@meshup.net>
+# Version : 1.0.0
+# URLs : https://github.com/hardware/mailserver-autoinstall
+#        http://mondedie.fr/viewtopic.php?pid=11746
+#
+# Désinstallation :
+#
+# chmod a+x uninstall.sh && ./uninstall.sh
 
 CSI="\033["
 CEND="${CSI}0m"
@@ -53,7 +60,7 @@ command -v mysqladmin > /dev/null 2>&1 || { echo `checkBin mysqladmin` >&2; exit
 clear
 
 echo ""
-echo -e "${CCYAN}          Script de déinstallation de Postfix, Dovecot et Rainloop${CEND}"
+echo -e "${CCYAN}          Script de désinstallation de Postfix, Dovecot et Rainloop${CEND}"
 echo ""
 echo -e "${CCYAN}
 ███╗   ███╗ ██████╗ ███╗   ██╗██████╗ ███████╗██████╗ ██╗███████╗   ███████╗██████╗

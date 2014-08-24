@@ -2,6 +2,9 @@
 #
 # Script d'installation de Postfix, Dovecot et Rainloop
 # Auteur : Hardware <contact@meshup.net>
+# Version : 1.0.0
+# URLs : https://github.com/hardware/mailserver-autoinstall
+#        http://mondedie.fr/viewtopic.php?pid=11746
 #
 # Nécessite Debian 7 “wheezy” - 32/64 bits minimum. Ainsi que :
 # Nginx, PHP, MySQL, OpenSSL (Un serveur LEMP fonctionnel)
