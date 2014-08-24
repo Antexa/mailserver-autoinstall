@@ -399,9 +399,9 @@ echo -e "${CBROWN}--------------------------------------------------------------
 echo ""
 
 echo ""
-echo -e "${CRED}------------------------------------------------------------------------------------------${CEND}"
+echo -e "${CRED}-----------------------------------------------------------------------------------${CEND}"
 echo -e "${CRED} /!\ N'APPUYEZ PAS SUR ENTREE AVANT D'AVOIR EFFECTUÉ TOUT CE QUI EST AU DESSUS /!\ ${CEND}"
-echo -e "${CRED}------------------------------------------------------------------------------------------${CEND}"
+echo -e "${CRED}-----------------------------------------------------------------------------------${CEND}"
 echo ""
 
 smallLoader
@@ -440,7 +440,7 @@ smtpd_helo_restrictions =
      permit_mynetworks,
      reject_invalid_helo_hostname,
      reject_non_fqdn_helo_hostname,
-     reject_unknown_helo_hostname
+# reject_unknown_helo_hostname
 
 smtpd_client_restrictions =
      permit_mynetworks,
@@ -726,9 +726,9 @@ clear
 
 # ##########################################################################
 
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
 echo -e "${CCYAN}[  INSTALLATION D'OPENDKIM  ]${CEND}"
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
 echo ""
 
 echo -e "${CGREEN}-> Installation de opendkim et opendkim-tools ${CEND}"
@@ -742,6 +742,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo ""
 echo -e "${CGREEN}-> Mise en place du fichier /etc/opendkim.conf ${CEND}"
 cat > /etc/opendkim.conf <<EOF
 AutoRestart             Yes
@@ -813,15 +814,7 @@ echo -e "${CGREEN}-> Création du répertoire /etc/opendkim/keys/${DOMAIN} ${CEN
 mkdir $DOMAIN && cd $DOMAIN
 
 echo -e "${CGREEN}-> Génération des clés de chiffrement ${CEND}"
-echo ""
-echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
-echo ""
-
 opendkim-genkey -s mail -d $DOMAIN
-
-echo ""
-echo -e "${CCYAN}------------------------------------------------------------------${CEND}"
-echo ""
 
 echo -e "${CGREEN}-> Modification des permissions des clés ${CEND}"
 chown opendkim:opendkim mail.private
@@ -1051,13 +1044,23 @@ echo -e "${CCYAN}[ CONFIGURATION DE VOS DNS ]${CEND}"
 echo -e "${CCYAN}----------------------------${CEND}"
 
 echo ""
+echo -e "${CBROWN}Maintenant ajoutez votre nom d'hôte et vos deux sous-domaines :${CEND}"
+echo ""
+echo -e "${CCYAN}--------------------------------------------------------${CEND}"
+echo -e "${CYELLOW}@                      IN      A         ${WANIP}${CEND}"
+echo -e "${CYELLOW}${HOSTNAME}            IN      A         ${WANIP}${CEND}"
+echo -e "${CYELLOW}${PFADOMAIN}           IN      CNAME     ${FQDN}.${CEND}"
+echo -e "${CYELLOW}${RAINLOOPDOMAIN}      IN      CNAME     ${FQDN}.${CEND}"
+echo -e "${CCYAN}--------------------------------------------------------${CEND}"
+
+echo ""
 echo -e "${CRED}Vous devez impérativement ajouter un enregistrement de type MX à votre nom de domaine !${CEND}"
 echo -e "${CRED}Si cet enregistrement est pas ou mal défini, vous ne reçevrez JAMAIS d'emails.${CEND}"
 echo -e "${CRED}Exemple (le point à la fin est IMPORTANT !!) :${CEND}"
 echo ""
-echo -e "${CCYAN}----------------------------${CEND}"
-echo -e "${CYELLOW}@    IN    MX    10    ${FQDN}.${CEND}"
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}------------------------------------${CEND}"
+echo -e "${CYELLOW}@    IN    MX    10    ${FQDN}.   ${CEND}"
+echo -e "${CCYAN}------------------------------------${CEND}"
 
 echo ""
 echo -e "${CBROWN}Ensuite ajoutez votre enregistrement DKIM :${CEND}"
@@ -1069,10 +1072,10 @@ echo ""
 
 echo -e "${CBROWN}Et pour finir vos enregistrements SPF :${CEND}"
 echo ""
-echo -e "${CCYAN}----------------------------${CEND}"
-echo -e "${CYELLOW}@    IN    TXT    \"v=spf1 a mx ip4:${WANIP} ~all\"${CEND}"
-echo -e "${CYELLOW}@    IN    SPF    \"v=spf1 a mx ip4:${WANIP} ~all\"${CEND}"
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
+echo -e "${CYELLOW}@    IN    TXT    \"v=spf1 a mx ip4:${WANIP} ~all\"     ${CEND}"
+echo -e "${CYELLOW}@    IN    SPF    \"v=spf1 a mx ip4:${WANIP} ~all\"     ${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 echo ""
 
 echo -e "${CCYAN}-----------------${CEND}"

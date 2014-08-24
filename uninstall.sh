@@ -135,6 +135,9 @@ echo -n "> /etc/nginx/sites-enabled/rainloop.conf"
 rm -rf /etc/nginx/sites-enabled/rainloop.conf
 echo -e " ${CGREEN}[OK]${CEND}"
 
+echo -e "${CGREEN}-> Redémarrage de Nginx...${CEND}"
+service nginx restart
+
 smallLoader
 clear
 
