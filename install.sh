@@ -64,7 +64,7 @@ smallLoader() {
 }
 
 checkBin() {
-    echo -e "${CRED}/!\ ERREUR: Le programme '$1' est requis pour cette installation."
+    echo -e "${CRED}/!\ ERREUR: Le programme '$1' est requis pour cette installation.${CEND}"
 }
 
 # Vérification des exécutables
@@ -183,6 +183,9 @@ echo ""
 echo -e "${CCYAN}-----------------------------------------------------------------------${CEND}"
 echo ""
 
+smallLoader
+clear
+
 fi
 #IF REPFQDN
 
@@ -221,9 +224,26 @@ echo ""
 echo -e "${CGREEN}------------------------------------------------------------------${CEND}"
 echo ""
 
+# mysqladmin: CREATE DATABASE failed; error: 'Can't create database 'postfix'; database exists'
+
 echo -e "${CGREEN}-> Création de la base de donnée Postfix ${CEND}"
-until mysqladmin -uroot -p$MYSQLPASSWD create postfix &> /dev/null
+until mysqladmin -uroot -p$MYSQLPASSWD create postfix &> /tmp/mysql-resp.tmp
 do
+    fgrep -q "database exists" /tmp/mysql-resp.tmp
+
+    # La base de donnée existe déjà ??
+    # Si c'est le cas, on arrête l'installation
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo -e "\n ${CRED}/!\ FATAL: La base de donnée Postfix existe déjà.${CEND}" 1>&2
+        echo -e "${CRED}Si une installation a déjà été effectuée merci de${CEND}" 1>&2
+        echo -e "${CRED}lancer le script de désinstallation puis de re-tenter${CEND}" 1>&2
+        echo -e "${CRED}une installation.${CEND}" 1>&2
+        echo ""
+        exit 1
+    fi
+
+    # La base de donnée n'existe pas donc c'est le mot de passe qui n'est pas bon
     echo -e "${CRED}\n /!\ ERREUR: Mot de passe root incorrect \n ${CEND}" 1>&2
     read -sp "> Veuillez re-saisir le mot de passe : " MYSQLPASSWD
     echo -e ""

@@ -142,6 +142,7 @@ echo -n "> /etc/nginx/sites-enabled/rainloop.conf"
 rm -rf /etc/nginx/sites-enabled/rainloop.conf
 echo -e " ${CGREEN}[OK]${CEND}"
 
+echo ""
 echo -e "${CGREEN}-> Redémarrage de Nginx...${CEND}"
 service nginx restart
 
@@ -172,17 +173,35 @@ if [[ "$IMA_FIRIN_MAH_LAZOR" = "OUI" ]] || [[ "$IMA_FIRIN_MAH_LAZOR" = "oui" ]];
     SQLQUERY="GRANT USAGE ON *.* TO 'postfix'@'localhost'; \
               DROP USER 'postfix'@'localhost';"
 
-    until mysql -uroot -p$MYSQLPASSWD "postfix" -e "$SQLQUERY" &> /dev/null
+    BDDEXIST=1
+
+    until mysql -uroot -p$MYSQLPASSWD "postfix" -e "$SQLQUERY" &> /tmp/mysql-resp.tmp
     do
+        fgrep -q "Unknown database" /tmp/mysql-resp.tmp
+
+        # La base de donnée n'existe pas
+        if [ $? -eq 0 ]; then
+            BDDEXIST=0
+            break
+        fi
+
+        # La base de donnée existe donc c'est le mot de passe qui n'est pas bon
         echo -e "${CRED}\n /!\ ERREUR: Mot de passe root incorrect \n ${CEND}" 1>&2
         read -sp "> Veuillez re-saisir le mot de passe : " MYSQLPASSWD
         echo ""
     done
 
-    echo ""
-    echo -e "${CGREEN}-> Suppression de l'utilisateur Postfix ${CEND}"
-    echo -e "${CGREEN}-> Suppression de la base de donnée Postfix ${CEND}"
-    mysqladmin -f -uroot -p$MYSQLPASSWD drop postfix &> /dev/null
+    if [ $BDDEXIST -eq 1 ]; then
+        echo ""
+        echo -e "${CGREEN}-> Suppression de l'utilisateur Postfix ${CEND}"
+        echo -e "${CGREEN}-> Suppression de la base de donnée Postfix ${CEND}"
+        mysqladmin -f -uroot -p$MYSQLPASSWD drop postfix &> /dev/null
+    else
+        echo ""
+        echo -e "${CCYAN}-> La base de donnée 'Postfix' n'existe pas, le script ${CEND}"
+        echo -e "${CCYAN}-> d'installation n'a probablement pas eu le temps de ${CEND}"
+        echo -e "${CCYAN}-> de la créer. ${CEND}"
+    fi
 fi
 # IF IMA_FIRIN_MAH_LAZOR
 
