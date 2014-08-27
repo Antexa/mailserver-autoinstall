@@ -565,7 +565,7 @@ if [ $? -ne 0 ]; then
     echo ""
     echo -e "\n ${CRED}/!\ FATAL: Une erreur est survenue pendant l'installation de Dovecot.${CEND}" 1>&2
     echo ""
-    exit 1
+    smallLoader
 fi
 
 echo ""

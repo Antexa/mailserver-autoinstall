@@ -47,7 +47,7 @@ smallLoader() {
 }
 
 checkBin() {
-    echo -e "${CRED}/!\ ERREUR: Le programme '$1' est requis."
+    echo -e "${CRED}/!\ ERREUR: Le programme '$1' est requis.${CEND}"
 }
 
 # Vérification des exécutables
