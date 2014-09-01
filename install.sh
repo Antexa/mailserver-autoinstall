@@ -470,14 +470,14 @@ smtpd_client_restrictions =
      permit_mynetworks,
      permit_inet_interfaces,
      permit_sasl_authenticated,
-     reject_plaintext_session,
-     reject_unauth_pipelining
+# reject_plaintext_session,
+# reject_unauth_pipelining
 
 smtpd_sender_restrictions =
      reject_non_fqdn_sender,
      reject_unknown_sender_domain
 
-smtpd_tls_security_level=encrypt
+smtpd_tls_security_level = may
 
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_type = dovecot
@@ -487,7 +487,7 @@ smtpd_sasl_tls_security_options = \$smtpd_sasl_security_options
 smtpd_sasl_local_domain = \$mydomain
 smtpd_sasl_authenticated_header = yes
 
-smtpd_tls_auth_only = yes
+smtpd_tls_auth_only = no
 smtpd_tls_cert_file = /etc/ssl/certs/dovecot.pem
 smtpd_tls_key_file  = /etc/ssl/private/dovecot.pem
 
