@@ -461,9 +461,10 @@ smtpd_recipient_restrictions =
 
 smtpd_helo_restrictions =
      permit_mynetworks,
+     permit_sasl_authenticated,
      reject_invalid_helo_hostname,
      reject_non_fqdn_helo_hostname,
-# reject_unknown_helo_hostname
+     reject_unknown_helo_hostname
 
 smtpd_client_restrictions =
      permit_mynetworks,
