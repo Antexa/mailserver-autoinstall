@@ -197,10 +197,10 @@ echo -e "${CCYAN}[  INSTALLATION DE POSTFIX  ]${CEND}"
 echo -e "${CCYAN}-----------------------------${CEND}"
 echo ""
 
-echo -e "${CGREEN}-> Installation de postfix et postfix-mysql ${CEND}"
+echo -e "${CGREEN}-> Installation de postfix, postfix-mysql et PHP-IMAP ${CEND}"
 echo ""
 
-apt-get install -y postfix postfix-mysql
+apt-get install -y postfix postfix-mysql php5-imap
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -1061,7 +1061,7 @@ echo -e "${CBROWN} - Mot de passe IMAP/SMTP :${CEND} ${CGREEN}Celui que vous ave
 echo -e "${CBROWN} - Serveur entrant IMAP :${CEND} ${CGREEN}${FQDN}${CEND}"
 echo -e "${CBROWN} - Serveur sortant SMTP :${CEND} ${CGREEN}${FQDN}${CEND}"
 echo -e "${CBROWN} - Port IMAP :${CEND} ${CGREEN}993${CEND}"
-echo -e "${CBROWN} - Port SMTP : 587 :${CEND} ${CGREEN}587${CEND}"
+echo -e "${CBROWN} - Port SMTP :${CEND} ${CGREEN}587${CEND}"
 echo -e "${CBROWN} - Protocole de chiffrement IMAP :${CEND} ${CGREEN}SSL/TLS${CEND}"
 echo -e "${CBROWN} - Protocole de chiffrement SMTP :${CEND} ${CGREEN}STARTTLS${CEND}"
 echo -e "${CBROWN}---------------------------------------------------------------------------${CEND}"
@@ -1076,28 +1076,28 @@ echo -e "${CCYAN}----------------------------${CEND}"
 echo ""
 echo -e "${CBROWN}Maintenant ajoutez votre nom d'hôte et vos deux sous-domaines :${CEND}"
 echo ""
-echo -e "${CCYAN}--------------------------------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 echo -e "${CYELLOW}@                      IN      A         ${WANIP}${CEND}"
 echo -e "${CYELLOW}${HOSTNAME}            IN      A         ${WANIP}${CEND}"
 echo -e "${CYELLOW}${PFADOMAIN}           IN      CNAME     ${FQDN}.${CEND}"
 echo -e "${CYELLOW}${RAINLOOPDOMAIN}      IN      CNAME     ${FQDN}.${CEND}"
-echo -e "${CCYAN}--------------------------------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 
 echo ""
 echo -e "${CRED}Vous devez impérativement ajouter un enregistrement de type MX à votre nom de domaine !${CEND}"
 echo -e "${CRED}Si cet enregistrement est pas ou mal défini, vous ne reçevrez JAMAIS d'emails.${CEND}"
 echo -e "${CRED}Exemple (le point à la fin est IMPORTANT !!) :${CEND}"
 echo ""
-echo -e "${CCYAN}------------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 echo -e "${CYELLOW}@    IN    MX    10    ${FQDN}.   ${CEND}"
-echo -e "${CCYAN}------------------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 
 echo ""
 echo -e "${CBROWN}Ensuite ajoutez votre enregistrement DKIM :${CEND}"
 echo ""
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 cat /etc/opendkim/keys/$DOMAIN/mail.txt
-echo -e "${CCYAN}----------------------------${CEND}"
+echo -e "${CCYAN}----------------------------------------------------------${CEND}"
 echo ""
 
 echo -e "${CBROWN}Et pour finir vos enregistrements SPF :${CEND}"
