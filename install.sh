@@ -278,6 +278,12 @@ echo ""
 echo -e "${CGREEN}-> Téléchargement de PostfixAdmin ${CEND}"
 echo ""
 
+
+if [ ! -d /var/www ]; then
+    mkdir -p /var/www
+    chown -R www-data:www-data /var/www
+fi
+
 cd /var/www
 URLPFA="http://downloads.sourceforge.net/project/postfixadmin/postfixadmin/postfixadmin-${POSTFIXADMIN_VER}/postfixadmin-${POSTFIXADMIN_VER}.tar.gz"
 
