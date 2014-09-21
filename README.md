@@ -23,7 +23,7 @@ apt-get install git-core
 cd /tmp
 git clone https://github.com/hardware/mailserver-autoinstall.git
 cd mailserver-autoinstall
-chmod a+x install.sh && ./install.sh
+chmod +x install.sh && ./install.sh
 ```
 
 ### Désinstallation
@@ -31,7 +31,7 @@ chmod a+x install.sh && ./install.sh
 Le script de désinstallation permet de supprimer absolument **TOUT** ce qu'à fait le script d'installation. Si vous avez une erreur pendant la configuration du serveur de mail, vous pouvez répartir à zéro avec ce script :
 
 ```bash
-chmod a+x uninstall.sh && ./uninstall.sh
+chmod +x uninstall.sh && ./uninstall.sh
 ```
 
 Ce script est tiré du tutoriel "Installation sécurisée d'un serveur de mail avec Postfix, Dovecot et Rainloop" : http://mondedie.fr/viewtopic.php?id=5750
