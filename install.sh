@@ -342,11 +342,29 @@ fi
 echo -e "${CGREEN}-> Ajout du vhost postfixadmin ${CEND}"
 cat > /etc/nginx/sites-enabled/postfixadmin.conf <<EOF
 server {
-    listen          80;
+  listen 80;
+  server_name     ${PFADOMAIN}.${DOMAIN};
+  return 301 https://$server_name$request_uri; # enforce https
+}
+
+server {
+    listen          443 ssl;
     server_name     ${PFADOMAIN}.${DOMAIN};
     root            /var/www/postfixadmin;
     index           index.php;
     charset         utf-8;
+
+	## SSL settings
+	ssl_certificate           /etc/nginx/ssl/server.crt;
+	ssl_certificate_key       /etc/nginx/ssl/server.key;
+	ssl_protocols             TLSv1.2;
+	ssl_ciphers               "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4";
+	ssl_prefer_server_ciphers on;
+	ssl_session_cache         shared:SSL:10m;
+	ssl_session_timeout       10m;
+	ssl_ecdh_curve            secp521r1;
+	
+	add_header Strict-Transport-Security max-age=31536000;
 
     auth_basic "PostfixAdmin - Connexion";
     auth_basic_user_file ${PASSWDPATH};
@@ -899,11 +917,29 @@ fi
 echo -e "${CGREEN}-> Ajout du vhost rainloop ${CEND}"
 cat > /etc/nginx/sites-enabled/rainloop.conf <<EOF
 server {
-    listen          80;
+	listen 			80;
+	server_name     ${RAINLOOPDOMAIN}.${DOMAIN};
+	return 301 		https://$server_name$request_uri; # enforce https
+}
+
+server {
+    listen          443 ssl;
     server_name     ${RAINLOOPDOMAIN}.${DOMAIN};
     root            /var/www/rainloop;
     index           index.php;
     charset         utf-8;
+
+	## SSL settings
+	ssl_certificate           /etc/nginx/ssl/server.crt;
+	ssl_certificate_key       /etc/nginx/ssl/server.key;
+	ssl_protocols             TLSv1.2;
+	ssl_ciphers               "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4";
+	ssl_prefer_server_ciphers on;
+	ssl_session_cache         shared:SSL:10m;
+	ssl_session_timeout       10m;
+	ssl_ecdh_curve            secp521r1;
+	
+	add_header Strict-Transport-Security max-age=31536000;
 
     auth_basic "Webmail - Connexion";
     auth_basic_user_file ${PASSWDPATH};
