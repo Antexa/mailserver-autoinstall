@@ -193,6 +193,25 @@ fi
 
 echo ""
 echo -e "${CCYAN}-----------------------------${CEND}"
+echo -e "${CCYAN}[  SSL Configuration - Cert ]${CEND}"
+echo -e "${CCYAN}-----------------------------${CEND}"
+echo ""
+
+mkdir -p /etc/nginx/ssl
+openssl req -new -x509 -days 3658 -nodes -newkey rsa:2048 -out /etc/nginx/ssl/server.crt -keyout /etc/nginx/ssl/server.key<<EOF
+FR
+
+
+
+
+${DOMAIN}
+contact@${DOMAIN}
+EOF
+
+
+
+echo ""
+echo -e "${CCYAN}-----------------------------${CEND}"
 echo -e "${CCYAN}[  INSTALLATION DE POSTFIX  ]${CEND}"
 echo -e "${CCYAN}-----------------------------${CEND}"
 echo ""
