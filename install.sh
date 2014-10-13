@@ -363,7 +363,7 @@ cat > /etc/nginx/sites-enabled/postfixadmin.conf <<EOF
 server {
   listen 80;
   server_name     ${PFADOMAIN}.${DOMAIN};
-  return 301 https://$server_name$request_uri; # enforce https
+  return 301 https://\$server_name\$request_uri; # enforce https
 }
 
 server {
@@ -938,7 +938,7 @@ cat > /etc/nginx/sites-enabled/rainloop.conf <<EOF
 server {
 	listen 			80;
 	server_name     ${RAINLOOPDOMAIN}.${DOMAIN};
-	return 301 		https://$server_name$request_uri; # enforce https
+	return 301 		https://\$server_name\$request_uri; # enforce https
 }
 
 server {
